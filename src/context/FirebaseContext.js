@@ -4,7 +4,7 @@ import { getAuth, signInWithEmailAndPassword, signOut, GoogleAuthProvider, signI
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { query, onSnapshot } from "firebase/firestore";
 import { doc, setDoc } from "firebase/firestore"; 
-import { getStorage, ref, uploadString, getDownloadURL  } from "firebase/storage";
+import { getStorage, ref, uploadString, getDownloadURL, deleteObject  } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCm5WtyZbK83dOUfst-wID9qgg1h9srGT4",
@@ -34,6 +34,14 @@ function uploadFileToStorage (str, fileName, setUrl) {
     .catch((error) => {
       console.log(error)
     });
+  });
+}
+
+async function deleteFileFromStorage(fileName){
+  deleteObject(ref(storage, fileName)).then(() => {
+    console.log('file was deleted')
+  }).catch((error) => {
+    console.log(error)
   });
 }
 
@@ -128,6 +136,7 @@ export const FirebaseProvider = ({ children }) => {
         signInWithGoogle,
         uploadFileToStorage,
         setUserUrls,
+        deleteFileFromStorage,
       }}
     >
       {children}

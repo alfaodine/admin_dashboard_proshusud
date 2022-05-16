@@ -5,6 +5,7 @@ import DocumentScannerIcon from '@mui/icons-material/DocumentScanner';
 import Divider from '@mui/material/Divider';
 import Button from '@mui/material/Button';
 import ModalAddFile from './ModalAddFile';
+import ModalDeleteFile from './ModalDeleteFile';
 
 function UserDocuments({urlArr, email}) {
     const regexp = /\/o\/(.+)\?alt=/
@@ -25,7 +26,8 @@ function UserDocuments({urlArr, email}) {
     }): <p>У пользователя пока нет документов</p>}
     <Stack direction="row">
     <ModalAddFile email={email} urlArr = {urlArr}/>
-    {(urlArr !== undefined)&&<Button sx={{ml: 2}} variant="outlined" color="error">Удалить документ</Button>}
+    
+    {(urlArr !== undefined)&&<ModalDeleteFile email={email} urlArr = {urlArr}/>}
     </Stack>
     </Stack>
   )
