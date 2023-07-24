@@ -48,11 +48,10 @@ async function deleteFileFromStorage(fileName){
 async function tryToSignIn(email, password) {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-
-} catch (error) {
-    // showLoginError(error);
-    console.log(error)
-}
+  } catch (error) {
+      // showLoginError(error);
+      console.log(error)
+  }
 }
 
 async function setDocInfo(email, field) {

@@ -6,13 +6,16 @@ import { useDrop } from 'react-dnd'
 function Item(props) {
     const { sx, ...other } = props;
 
-    const [{ canDrop, isOver }, drop] = useDrop(() => ({
+    const [{ canDrop, isOver, handlerId }, drop] = useDrop(() => ({
       accept: 'box',
-      drop: () => ({ name: props.colomn }),
+      drop: () => {
+        return { name: props.colomn }
+      },
       collect: (monitor) => ({
         isOver: monitor.isOver(),
         canDrop: monitor.canDrop(),
-      }),
+        handlerId: monitor.getHandlerId(),
+      })
     }))
 
   return (
