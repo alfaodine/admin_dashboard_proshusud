@@ -11,7 +11,7 @@ import FirebaseContext from '../../context/FirebaseContext';
 
 import {useDrag, useDrop} from 'react-dnd'
 
-function TaskCard({index, item, moveCard}) {
+function TaskCard({index, item, moveCard, changeBackendData}) {
 
   const {setDocInfo} = useContext(FirebaseContext);
 
@@ -24,6 +24,10 @@ function TaskCard({index, item, moveCard}) {
       }
     },
     hover(item, monitor) {
+
+      // console.log(item)
+    },
+    drop(item, monitor) {
       if (!ref.current) {
         return
       }
@@ -34,21 +38,11 @@ function TaskCard({index, item, moveCard}) {
         return
       }
 
-      const hoverBoundingRect = ref.current?.getBoundingClientRect()
-      const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2
-      const clientOffset = monitor.getClientOffset()
-      const hoverClientY = clientOffset.y - hoverBoundingRect.top
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-        return
-      }
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-        return
-      }
-
       moveCard(dragIndex, hoverIndex)
-      item.index = hoverIndex
-    },
+      changeBackendData(dragIndex, hoverIndex)
+
+      return { sameColumn: true };
+    }
   })
 
 
@@ -59,13 +53,20 @@ function TaskCard({index, item, moveCard}) {
     },
     end: (item, monitor) => {
       const dropResult = monitor.getDropResult()
-      if (item && dropResult) {
-        setDocInfo(item.email, dropResult.name)
+      if (dropResult) {
+        if (dropResult.sameColumn === true) {
+        } else if (dropResult.sameColumn === false) {
+          console.log('sameCoulmn is ', dropResult.sameColumn)
+          if (item) {
+            setDocInfo(item.email, dropResult.name)
+          }
+        }
       }
     }
   });
 
   drag(drop(ref));
+
   return (
       <Card
         ref={ref}

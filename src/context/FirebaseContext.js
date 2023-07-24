@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup  } from "firebase/auth";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { getFirestore, collection, getDoc, getDocs, updateDoc, orderBy } from "firebase/firestore";
 import { query, onSnapshot } from "firebase/firestore";
 import { doc, setDoc } from "firebase/firestore"; 
 import { getStorage, ref, uploadString, getDownloadURL, deleteObject  } from "firebase/storage";
@@ -54,8 +54,25 @@ async function tryToSignIn(email, password) {
   }
 }
 
+async function getDocData(id) {
+  const ref = await doc(db, 'orders', id);
+  const res = await getDoc(ref);
+  return res
+}
+
+
+// set order field if they were not set
+async function setOrderField() {
+  const ref = collection(db, 'orders');
+  const res = await getDocs(query(ref, orderBy('order')));
+  res.docs.forEach((doc, i) => {
+    updateDoc(doc.ref, {...doc.data(), order: i})
+  })
+  return res
+}
+
 async function setDocInfo(email, field) {
-  console.log(email, field)
+  // console.log(email, field)
   const cityRef = doc(db, 'orders', email);
   await setDoc(cityRef,{ field }, { merge: true });
 }
@@ -98,15 +115,16 @@ export const FirebaseProvider = ({ children }) => {
   const [myUsers, setUsers] = useState([]);
 
   useEffect(() => {
-  const q = query(collection(db, "orders"));
-  const unsubscribe = onSnapshot(q, (querySnapshot) => {
-    const orders = [];
-    querySnapshot.forEach((doc) => {
-      orders.push(doc.data());
-    });
+    const q = query(collection(db, "orders"), orderBy('order'));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      setOrderField();
+      const orders = [];
+      querySnapshot.forEach((doc) => {
+        orders.push(doc.data());
+      });
 
-    setOrders(orders)
-  });
+      setOrders(orders)
+    });
   },[]);
 
   useEffect(() => {
@@ -127,6 +145,7 @@ export const FirebaseProvider = ({ children }) => {
     <FirebaseContext.Provider
       value={{
         myList,
+        getDocData,
         setDocInfo,
         setComment,
         myUsers,
