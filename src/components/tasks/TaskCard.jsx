@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
@@ -9,35 +9,71 @@ import RightDrawer from '../RightDrawer';
 import { useContext } from 'react';
 import FirebaseContext from '../../context/FirebaseContext';
 
-import { useDrag } from 'react-dnd'
+import {useDrag, useDrop} from 'react-dnd'
 
-function TaskCard({item}) {
+function TaskCard({index, item, moveCard, changeBackendData}) {
 
-  const {setDocInfo} = useContext(FirebaseContext)
+  const {setDocInfo} = useContext(FirebaseContext);
 
-  let item1 = item
-  ///////////////
-
-  const [{ isDragging }, drag] = useDrag(() => ({
-    type: 'box',
-    item: 'box',
-    end: (item, monitor) => {
-      const dropResult = monitor.getDropResult()
-      if (item && dropResult) {
-        setDocInfo(item1.email, dropResult.name)
+  const ref = useRef(null);
+  const [{ handlerId }, drop] = useDrop({
+    accept: 'box',
+    collect(monitor) {
+      return {
+        handlerId: monitor.getHandlerId(),
       }
     },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-      handlerId: monitor.getHandlerId(),
-    }),
-  }))
-  const opacity = isDragging ? 0.4 : 1
-  const border = isDragging ? 'solid 1px black' : null
+    hover(item, monitor) {
 
+      // console.log(item)
+    },
+    drop(item, monitor) {
+      if (!ref.current) {
+        return
+      }
+      const dragIndex = item.index
+      const hoverIndex = index
+
+      if (dragIndex === hoverIndex) {
+        return
+      }
+
+      moveCard(dragIndex, hoverIndex)
+      changeBackendData(dragIndex, hoverIndex)
+
+      return { sameColumn: true };
+    }
+  })
+
+
+  const [, drag] = useDrag({
+    type: 'box',
+    item: () => {
+      return { ...item, index }
+    },
+    end: (item, monitor) => {
+      const dropResult = monitor.getDropResult()
+      if (dropResult) {
+        if (dropResult.sameColumn === true) {
+        } else if (dropResult.sameColumn === false) {
+          console.log('sameCoulmn is ', dropResult.sameColumn)
+          if (item) {
+            setDocInfo(item.email, dropResult.name)
+          }
+        }
+      }
+    }
+  });
+
+  drag(drop(ref));
 
   return (
-      <Card ref={drag} className = {'card' + (item.status === 'success' ? ' card__green' : '') + ((item.status === 'created' || item.status === 'processing') ? ' card__orange' : '') + ((item.status === 'failure' || item.status === 'reversed' || item.status === 'expired') ? ' card__red' : '') } style={{ opacity, border }} sx={{ width: '80%', margin: 'auto', marginTop: '10px' }}>
+      <Card
+        ref={ref}
+        className = {'card' + (item.status === 'success' ? ' card__green' : '') + ((item.status === 'created' || item.status === 'processing') ? ' card__orange' : '') + ((item.status === 'failure' || item.status === 'reversed' || item.status === 'expired') ? ' card__red' : '') }
+        sx={{ width: '80%', margin: 'auto', marginTop: '10px' }}
+        data-handler-id={handlerId}
+      >
       <CardContent >
         <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
           {item.service} {item.date}
@@ -48,6 +84,7 @@ function TaskCard({item}) {
         <Typography sx={{ mb: 1.5 }} color="text.secondary">
           {item.phone}
         </Typography>
+
         {/* <Typography variant="body2">
             {item.text}
           <br />

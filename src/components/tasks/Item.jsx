@@ -6,13 +6,24 @@ import { useDrop } from 'react-dnd'
 function Item(props) {
     const { sx, ...other } = props;
 
-    const [{ canDrop, isOver }, drop] = useDrop(() => ({
+    const [{ canDrop, isOver, handlerId }, drop] = useDrop(() => ({
       accept: 'box',
-      drop: () => ({ name: props.colomn }),
+      drop: (item) => {
+        // if drop was in the same column this function returns undefined because another function works on it
+        // Function that works on drop in the same column in file TaskCard useDrop -> drop.
+        // But in this way main work in file TaskCard in function useDrop -> hover. There we create request that changes data on backend
+        if (item.field === props.colomn) {
+          console.log(item.field, props.colomn)
+          return undefined;
+        }
+        console.log(item.field, props.colomn)
+        return { sameColumn: false, name: props.colomn }
+      },
       collect: (monitor) => ({
         isOver: monitor.isOver(),
         canDrop: monitor.canDrop(),
-      }),
+        handlerId: monitor.getHandlerId(),
+      })
     }))
 
   return (

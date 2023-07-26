@@ -23,6 +23,8 @@ import { FirebaseProvider } from "./context/FirebaseContext";
 function App() {
 
   const [loggedIn, checkUser] = useState(false);
+  // const loggedIn = true;
+  // const checkUser = () => ({})
 
   const firebaseConfig = {
     apiKey: "AIzaSyCm5WtyZbK83dOUfst-wID9qgg1h9srGT4",
@@ -39,7 +41,7 @@ function App() {
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
-      if ((user.uid === 'wbl8ODIK96bJdgTCRUA59gYccC12') || (user.uid === 'vzcAow1ZKCXltpBd7sFH17O2zx32')) {
+      if ((user.uid === 'wbl8ODIK96bJdgTCRUA59gYccC12') || (user.uid === 'vzcAow1ZKCXltpBd7sFH17O2zx32') || (user.uid === 'fwK5ShlcCfNRNA1NWZv5IGDh10i2')) {
           checkUser(true)
       } else {
           signOut(auth)
@@ -48,7 +50,6 @@ function App() {
       }
     })
   }, [])
-  console.log(loggedIn)
 
   return (
     <div>
